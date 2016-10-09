@@ -8,6 +8,7 @@ http://www.mulesoft.org/schema/mule/ee/dw http://www.mulesoft.org/schema/mule/ee
     <http:listener-config name="api-httpListenerConfig" host="0.0.0.0" port="8081" doc:name="HTTP Listener Configuration"/>
     <apikit:config name="api-config" raml="api.raml" consoleEnabled="false" doc:name="Router"/>
     <ws:consumer-config name="Web_Service_Consumer" service="GlobalWeather" port="GlobalWeatherSoap12" serviceAddress="http://www.webservicex.com/globalweather.asmx" wsdlLocation="http://www.webservicex.com/globalweather.asmx?WSDL" doc:name="Web Service Consumer"/>
+    <ws:consumer-config name="Web_Service_Consumer1" service="GlobalWeather" port="GlobalWeatherSoap12" serviceAddress="http://www.webservicex.com/globalweather.asmx" wsdlLocation="http://www.webservicex.com/globalweather.asmx?WSDL" doc:name="Web Service Consumer"/>
     <flow name="api-main">
         <http:listener config-ref="api-httpListenerConfig" path="/api/*" doc:name="HTTP"/>
         <apikit:router config-ref="api-config" doc:name="APIkit Router"/>
@@ -54,7 +55,28 @@ http://www.mulesoft.org/schema/mule/ee/dw http://www.mulesoft.org/schema/mule/ee
         <set-payload value="&quot;city&quot;: [&#xA;    {&#xA;      &quot;country&quot;: &quot;Melbourne&quot;,&#xA;      &quot;description&quot;: &quot;Melbourne - great place to be.&quot;&#xA;    }&#xA;    ]" doc:name="Set Payload"/>
     </flow>
     <flow name="get:/countries/{countryName}:api-config">
-        <set-payload value="&quot;countries&quot;: [&#xA;    {&#xA;      &quot;country&quot;: &quot;Australia&quot;,&#xA;      &quot;description&quot;: &quot;Australia - great country.&quot;&#xA;    }&#xA;    ]" doc:name="Set Payload"/>
+        <dw:transform-message doc:name="Transform Message">
+            <dw:set-payload><![CDATA[%dw 1.0
+%output application/xml
+%namespace ns0 http://www.webserviceX.NET
+---
+{
+	ns0#GetCitiesByCountry: {
+		ns0#CountryName: flowVars.countryName
+	}
+}]]></dw:set-payload>
+        </dw:transform-message>
+        <ws:consumer config-ref="Web_Service_Consumer1" operation="GetCitiesByCountry" doc:name="Web Service Consumer"/>
+        <dw:transform-message metadata:id="7abedd22-2db7-4ca5-9c72-8c4f81645e81" doc:name="Transform Message">
+            <dw:set-payload><![CDATA[%dw 1.0
+%output application/java
+%namespace ns0 http://www.webserviceX.NET
+---
+{
+	countries: read(payload.ns0#GetCitiesByCountryResponse.ns0#GetCitiesByCountryResult, "application/xml").NewDataSet.*Table..Country distinctBy $
+}]]></dw:set-payload>
+        </dw:transform-message>
+
     </flow>
     <apikit:mapping-exception-strategy name="api-apiKitGlobalExceptionMapping">
         <apikit:mapping statusCode="404">
