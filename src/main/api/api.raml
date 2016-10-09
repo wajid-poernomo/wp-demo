@@ -31,7 +31,7 @@ baseUri: /weatherApi
           body:
             application/json:
               example: |
-                "countries": [
+                "country": [
                     {
                       "country": "Australia",
                       "description": "Australia - great country."
@@ -44,18 +44,18 @@ baseUri: /weatherApi
             body:
               application/json:
                 example: |
-                  "countries": [
+                  "cities": [
                       {
-                        "country": "Melbourne"
+                        "city": "Melbourne"
                       },
                       {
-                        "country": "Brisbane"
+                        "city": "Brisbane"
                       },
                       {
-                        "country": "Perth"
+                        "city": "Perth"
                       },
                       {
-                        "country": "Darwin"
+                        "city": "Darwin"
                       }
                       ]
       /{city}:
@@ -67,7 +67,7 @@ baseUri: /weatherApi
                   example: |
                     "city": [
                         {
-                          "country": "Melbourne",
+                          "city": "Melbourne",
                           "description": "Melbourne - great place to be."
                         }
                         ]
@@ -78,7 +78,6 @@ baseUri: /weatherApi
       city:
     responses:
       200:
-
         body:
           application/json:
             example: |
