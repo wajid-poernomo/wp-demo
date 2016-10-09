@@ -1,0 +1,99 @@
+#%RAML 1.0
+title: test01
+version: 1
+baseUri: /weatherApi
+
+/countries:
+  get:
+    responses:
+      200:
+        body:
+          application/json:
+            example: |
+              "countries": [
+                  {
+                    "country": "Australia"
+                  },
+                  {
+                    "country": "Canada"
+                  },
+                  {
+                    "country": "Botswana"
+                  },
+                  {
+                    "country": "Indonesia"
+                  }
+                  ]
+  /{countryName}:
+    get:
+      responses:
+        200:
+          body:
+            application/json:
+              example: |
+                "countries": [
+                    {
+                      "country": "Australia",
+                      "description": "Australia - great country."
+                    }
+                    ]
+    /Cities:
+      get:
+        responses:
+          200:
+            body:
+              application/json:
+                example: |
+                  "countries": [
+                      {
+                        "country": "Melbourne"
+                      },
+                      {
+                        "country": "Brisbane"
+                      },
+                      {
+                        "country": "Perth"
+                      },
+                      {
+                        "country": "Darwin"
+                      }
+                      ]
+      /{city}:
+        get:
+          responses:
+            200:
+              body:
+                application/json:
+                  example: |
+                    "city": [
+                        {
+                          "country": "Melbourne",
+                          "description": "Melbourne - great place to be."
+                        }
+                        ]
+/weather:
+  get:
+    queryParameters:
+      country:
+      city:
+    responses:
+      200:
+
+        body:
+          application/json:
+            example: |
+              "CurrentWeather": [
+                  {
+                    "Location": "BOSTON LOGAN INTERNATIONAL, MA, United States (KBOS) 42-22N 071-01W 54M",
+                    "Time": "Nov 30, 2013 - 03:54 PM EST / 2013.11.30 2054 UTC",
+                    "Wind": "from the E (100 degrees) at 5 MPH (4 KT):0",
+                    "Visibility": "10 mile(s):0",
+                    "SkyConditions": "mostly cloudy",
+                    "Temperature": "30.9 F (-0.6 C)",
+                    "Wind": "Windchill: 26 F (-3 C):1",
+                    "DewPoint": "18.0 F (-7.8 C)",
+                    "RelativeHumidity": "58%",
+                    "Pressure": "30.63 in. Hg (1037 hPa)",
+                    "PressureTendency": "0.07 inches (2.3 hPa) lower than three hours ago"
+                  }
+                  ]
