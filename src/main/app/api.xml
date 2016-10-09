@@ -9,6 +9,8 @@ http://www.mulesoft.org/schema/mule/ee/dw http://www.mulesoft.org/schema/mule/ee
     <apikit:config name="api-config" raml="api.raml" consoleEnabled="false" doc:name="Router"/>
     <ws:consumer-config name="Web_Service_Consumer" service="GlobalWeather" port="GlobalWeatherSoap12" serviceAddress="http://www.webservicex.com/globalweather.asmx" wsdlLocation="http://www.webservicex.com/globalweather.asmx?WSDL" doc:name="Web Service Consumer"/>
     <ws:consumer-config name="Web_Service_Consumer1" service="GlobalWeather" port="GlobalWeatherSoap12" serviceAddress="http://www.webservicex.com/globalweather.asmx" wsdlLocation="http://www.webservicex.com/globalweather.asmx?WSDL" doc:name="Web Service Consumer"/>
+    <ws:consumer-config name="Web_Service_Consumer2" service="GlobalWeather" port="GlobalWeatherSoap12" serviceAddress="http://www.webservicex.com/globalweather.asmx" wsdlLocation="http://www.webservicex.com/globalweather.asmx?WSDL" doc:name="Web Service Consumer"/>
+    <ws:consumer-config name="Web_Service_Consumer3" service="GlobalWeather" port="GlobalWeatherSoap12" serviceAddress="http://www.webservicex.com/globalweather.asmx" wsdlLocation="http://www.webservicex.com/globalweather.asmx?WSDL" doc:name="Web Service Consumer"/>
     <flow name="api-main">
         <http:listener config-ref="api-httpListenerConfig" path="/api/*" doc:name="HTTP"/>
         <apikit:router config-ref="api-config" doc:name="APIkit Router"/>
@@ -19,7 +21,31 @@ http://www.mulesoft.org/schema/mule/ee/dw http://www.mulesoft.org/schema/mule/ee
         <apikit:console config-ref="api-config" doc:name="APIkit Console"/>
     </flow>
     <flow name="get:/countries/{countryName}/Cities:api-config">
-        <set-payload value="&quot;countries&quot;: [&#xA;    {&#xA;      &quot;country&quot;: &quot;Melbourne&quot;&#xA;    },&#xA;    {&#xA;      &quot;country&quot;: &quot;Brisbane&quot;&#xA;    },&#xA;    {&#xA;      &quot;country&quot;: &quot;Perth&quot;&#xA;    },&#xA;    {&#xA;      &quot;country&quot;: &quot;Darwin&quot;&#xA;    }&#xA;    ]" doc:name="Set Payload"/>
+        <dw:transform-message doc:name="Transform Message">
+            <dw:set-payload><![CDATA[%dw 1.0
+%output application/xml
+%namespace ns0 http://www.webserviceX.NET
+---
+{
+	ns0#GetCitiesByCountry: {
+		ns0#CountryName: flowVars.countryName
+	}
+}]]></dw:set-payload>
+        </dw:transform-message>
+        <ws:consumer config-ref="Web_Service_Consumer3" operation="GetCitiesByCountry" doc:name="Web Service Consumer"/>
+        <dw:transform-message doc:name="Transform Message">
+            <dw:set-payload><![CDATA[%dw 1.0
+%output application/json
+%namespace ns0 http://www.webserviceX.NET
+%var toItem = (item) -> {name: item, description: item ++ "- a great city to be."}
+---
+
+{
+	cities: read(payload.ns0#GetCitiesByCountryResponse.ns0#GetCitiesByCountryResult, "application/xml").NewDataSet.*Table..City distinctBy $ map
+		"city" : toItem($)
+}]]></dw:set-payload>
+        </dw:transform-message>
+
     </flow>
     <flow name="get:/countries:api-config">
         <dw:transform-message doc:name="Transform Message">
@@ -41,10 +67,10 @@ http://www.mulesoft.org/schema/mule/ee/dw http://www.mulesoft.org/schema/mule/ee
 %var toItem = (item) -> {name: item }
 ---
 {
-	countries : [
+	countries : 
 		read(payload.ns0#GetCitiesByCountryResponse.ns0#GetCitiesByCountryResult, "application/xml").NewDataSet.*Table..Country distinctBy $ map
 		"country" : toItem($)
-	]
+	
 }
 ]]></dw:set-payload>
         </dw:transform-message>
@@ -54,7 +80,32 @@ http://www.mulesoft.org/schema/mule/ee/dw http://www.mulesoft.org/schema/mule/ee
         <set-payload value="&quot;CurrentWeather&quot;: [&#xA;    {&#xA;      &quot;Location&quot;: &quot;BOSTON LOGAN INTERNATIONAL, MA, United States (KBOS) 42-22N 071-01W 54M&quot;,&#xA;      &quot;Time&quot;: &quot;Nov 30, 2013 - 03:54 PM EST / 2013.11.30 2054 UTC&quot;,&#xA;      &quot;Wind&quot;: &quot;from the E (100 degrees) at 5 MPH (4 KT):0&quot;,&#xA;      &quot;Visibility&quot;: &quot;10 mile(s):0&quot;,&#xA;      &quot;SkyConditions&quot;: &quot;mostly cloudy&quot;,&#xA;      &quot;Temperature&quot;: &quot;30.9 F (-0.6 C)&quot;,&#xA;      &quot;Wind&quot;: &quot;Windchill: 26 F (-3 C):1&quot;,&#xA;      &quot;DewPoint&quot;: &quot;18.0 F (-7.8 C)&quot;,&#xA;      &quot;RelativeHumidity&quot;: &quot;58%&quot;,&#xA;      &quot;Pressure&quot;: &quot;30.63 in. Hg (1037 hPa)&quot;,&#xA;      &quot;PressureTendency&quot;: &quot;0.07 inches (2.3 hPa) lower than three hours ago&quot;&#xA;    }&#xA;    ]" doc:name="Set Payload"/>
     </flow>
     <flow name="get:/countries/{countryName}/Cities/{city}:api-config">
-        <set-payload value="&quot;city&quot;: [&#xA;    {&#xA;      &quot;country&quot;: &quot;Melbourne&quot;,&#xA;      &quot;description&quot;: &quot;Melbourne - great place to be.&quot;&#xA;    }&#xA;    ]" doc:name="Set Payload"/>
+        <dw:transform-message doc:name="Transform Message">
+            <dw:set-payload><![CDATA[%dw 1.0
+%output application/xml
+%namespace ns0 http://www.webserviceX.NET
+---
+{
+	ns0#GetCitiesByCountry: {
+		ns0#CountryName: flowVars.countryName
+	}
+}]]></dw:set-payload>
+        </dw:transform-message>
+        <ws:consumer config-ref="Web_Service_Consumer2" operation="GetCitiesByCountry" doc:name="Web Service Consumer"/>
+        <dw:transform-message metadata:id="231617f2-ab6f-4fa2-8a1d-69a26749b551" doc:name="Transform Message">
+            <dw:set-payload><![CDATA[%dw 1.0
+%output application/json
+%namespace ns0 http://www.webserviceX.NET
+%var toItem = (item) -> {name: item, description: item ++ "- a great city to be."}
+---
+
+read(payload.ns0#GetCitiesByCountryResponse.ns0#GetCitiesByCountryResult, "application/xml").NewDataSet.*Table..City filter
+		flowVars.city == $ map {
+			"city" : toItem($)	
+		}
+]]></dw:set-payload>
+        </dw:transform-message>
+
     </flow>
     <flow name="get:/countries/{countryName}:api-config">
         <dw:transform-message doc:name="Transform Message">
@@ -71,13 +122,15 @@ http://www.mulesoft.org/schema/mule/ee/dw http://www.mulesoft.org/schema/mule/ee
         <ws:consumer config-ref="Web_Service_Consumer1" operation="GetCitiesByCountry" doc:name="Web Service Consumer"/>
         <dw:transform-message metadata:id="7abedd22-2db7-4ca5-9c72-8c4f81645e81" doc:name="Transform Message">
             <dw:set-payload><![CDATA[%dw 1.0
-%output application/java
+%output application/json
 %namespace ns0 http://www.webserviceX.NET
 %var toItem = (item) -> {name: item, description: item ++ "- a great country to be."}
 ---
-
-read(payload.ns0#GetCitiesByCountryResponse.ns0#GetCitiesByCountryResult, "application/xml").NewDataSet.*Table..Country distinctBy $ map
-		"country" : toItem($)
+read(payload.ns0#GetCitiesByCountryResponse.ns0#GetCitiesByCountryResult, "application/xml").NewDataSet.*Table..Country 
+		distinctBy $ map
+		{
+			"country" : toItem($)
+		}
 ]]></dw:set-payload>
         </dw:transform-message>
 
