@@ -11,6 +11,8 @@ http://www.mulesoft.org/schema/mule/ee/dw http://www.mulesoft.org/schema/mule/ee
     <ws:consumer-config name="Web_Service_Consumer1" service="GlobalWeather" port="GlobalWeatherSoap12" serviceAddress="http://www.webservicex.com/globalweather.asmx" wsdlLocation="http://www.webservicex.com/globalweather.asmx?WSDL" doc:name="Web Service Consumer"/>
     <ws:consumer-config name="Web_Service_Consumer2" service="GlobalWeather" port="GlobalWeatherSoap12" serviceAddress="http://www.webservicex.com/globalweather.asmx" wsdlLocation="http://www.webservicex.com/globalweather.asmx?WSDL" doc:name="Web Service Consumer"/>
     <ws:consumer-config name="Web_Service_Consumer3" service="GlobalWeather" port="GlobalWeatherSoap12" serviceAddress="http://www.webservicex.com/globalweather.asmx" wsdlLocation="http://www.webservicex.com/globalweather.asmx?WSDL" doc:name="Web Service Consumer"/>
+    <ws:consumer-config name="Web_Service_Consumer4" service="GlobalWeather" port="GlobalWeatherSoap12" serviceAddress="http://www.webservicex.com/globalweather.asmx" wsdlLocation="http://www.webservicex.com/globalweather.asmx?WSDL" doc:name="Web Service Consumer"/>
+    <ws:consumer-config name="Web_Service_Consumer5" service="GlobalWeatherSoapService" port="GlobalWeatherSoapPort" serviceAddress="http://localhost:63081/weather" wsdlLocation="http://localhost:63081/weather?wsdl" doc:name="Web Service Consumer"/>
     <flow name="api-main">
         <http:listener config-ref="api-httpListenerConfig" path="/api/*" doc:name="HTTP"/>
         <apikit:router config-ref="api-config" doc:name="APIkit Router"/>
@@ -77,7 +79,30 @@ http://www.mulesoft.org/schema/mule/ee/dw http://www.mulesoft.org/schema/mule/ee
 
     </flow>
     <flow name="get:/weather:api-config">
-        <set-payload value="&quot;CurrentWeather&quot;: [&#xA;    {&#xA;      &quot;Location&quot;: &quot;BOSTON LOGAN INTERNATIONAL, MA, United States (KBOS) 42-22N 071-01W 54M&quot;,&#xA;      &quot;Time&quot;: &quot;Nov 30, 2013 - 03:54 PM EST / 2013.11.30 2054 UTC&quot;,&#xA;      &quot;Wind&quot;: &quot;from the E (100 degrees) at 5 MPH (4 KT):0&quot;,&#xA;      &quot;Visibility&quot;: &quot;10 mile(s):0&quot;,&#xA;      &quot;SkyConditions&quot;: &quot;mostly cloudy&quot;,&#xA;      &quot;Temperature&quot;: &quot;30.9 F (-0.6 C)&quot;,&#xA;      &quot;Wind&quot;: &quot;Windchill: 26 F (-3 C):1&quot;,&#xA;      &quot;DewPoint&quot;: &quot;18.0 F (-7.8 C)&quot;,&#xA;      &quot;RelativeHumidity&quot;: &quot;58%&quot;,&#xA;      &quot;Pressure&quot;: &quot;30.63 in. Hg (1037 hPa)&quot;,&#xA;      &quot;PressureTendency&quot;: &quot;0.07 inches (2.3 hPa) lower than three hours ago&quot;&#xA;    }&#xA;    ]" doc:name="Set Payload"/>
+        <dw:transform-message doc:name="Transform Message">
+            <dw:set-payload><![CDATA[%dw 1.0
+%output application/xml
+%namespace ns0 http://www.webserviceX.NET
+---
+{
+	ns0#GetWeather: {
+		ns0#CityName: inboundProperties."http.query.params".city,
+		ns0#CountryName: inboundProperties."http.query.params".country
+	}
+}]]></dw:set-payload>
+        </dw:transform-message>
+        <ws:consumer config-ref="Web_Service_Consumer5" operation="GetWeather" doc:name="Web Service Consumer"/>
+        <dw:transform-message metadata:id="c2e903a5-01d1-4cb0-b8af-fa937faa5721" doc:name="Transform Message">
+            <dw:set-payload><![CDATA[%dw 1.0
+%output application/json
+%namespace ns0 http://www.webserviceX.NET
+---
+{
+	thing: payload.ns0#GetWeatherResponse.ns0#GetWeatherResult
+}
+]]></dw:set-payload>
+        </dw:transform-message>
+
     </flow>
     <flow name="get:/countries/{countryName}/Cities/{city}:api-config">
         <dw:transform-message doc:name="Transform Message">

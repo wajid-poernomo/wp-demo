@@ -1,0 +1,48 @@
+{
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "title": "weatherData",
+    "description": "Weather Data",
+    "type": "object",
+    "properties": {
+        "Location": {
+            "description": "",
+            "type": "string"
+        },
+        "Time": {
+            "description": "",
+            "type": "string"
+        },
+        "Wind": {
+            "description": "",
+            "type": "string"
+        },
+        "Visibility": {
+            "description": "",
+            "type": "string"
+        },
+  		"SkyConditions": {
+            "description": "",
+            "type": "string"
+        },
+		"Temperature": {
+            "description": "",
+            "type": "string"
+        },
+		"DewPoint": {
+            "description": "",
+            "type": "string"
+        },
+		"RelativeHumidity": {
+            "description": "",
+            "type": "string"
+        },
+		"Pressure": {
+            "description": "",
+            "type": "string"
+        },
+		"PressureTendency": {
+			"description": "",
+            "type": "string"
+        },        
+    }
+}
