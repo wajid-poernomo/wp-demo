@@ -19,16 +19,7 @@
             <org.mule.common.metadata.property.TextBasedExampleMetaDataModelProperty/>
             <org.mule.common.metadata.property.xml.SchemaTypeMetaDataProperty/>
             <org.mule.common.metadata.property.StructureIdentifierMetaDataModelProperty>
-              <metaDataKey class="org.mule.common.metadata.DefaultMetaDataKey">
-                <id>GetWeather</id>
-                <displayName>GetWeather</displayName>
-                <category>DEFAULT</category>
-                <metaDataKeyPropertiesManager>
-                  <properties>
-                    <org.mule.common.metadata.key.property.dsql.DsqlFromMetaDataKeyProperty/>
-                  </properties>
-                </metaDataKeyPropertiesManager>
-              </metaDataKey>
+              <metaDataKey class="org.mule.common.metadata.DefaultMetaDataKey" reference="../../../../../org.mule.common.metadata.DefaultMetaDataKey"/>
               <derivedStructure>false</derivedStructure>
               <generatedStructure>false</generatedStructure>
             </org.mule.common.metadata.property.StructureIdentifierMetaDataModelProperty>
@@ -167,16 +158,7 @@
             <org.mule.common.metadata.property.TextBasedExampleMetaDataModelProperty/>
             <org.mule.common.metadata.property.xml.SchemaTypeMetaDataProperty/>
             <org.mule.common.metadata.property.StructureIdentifierMetaDataModelProperty>
-              <metaDataKey class="org.mule.common.metadata.DefaultMetaDataKey">
-                <id>GetWeatherResponse</id>
-                <displayName>GetWeatherResponse</displayName>
-                <category>DEFAULT</category>
-                <metaDataKeyPropertiesManager>
-                  <properties>
-                    <org.mule.common.metadata.key.property.dsql.DsqlFromMetaDataKeyProperty/>
-                  </properties>
-                </metaDataKeyPropertiesManager>
-              </metaDataKey>
+              <metaDataKey class="org.mule.common.metadata.DefaultMetaDataKey" reference="../../../../../org.mule.common.metadata.DefaultMetaDataKey"/>
               <derivedStructure>false</derivedStructure>
               <generatedStructure>false</generatedStructure>
             </org.mule.common.metadata.property.StructureIdentifierMetaDataModelProperty>
@@ -269,5 +251,5 @@
       </org.mule.common.metadata.DefaultXmlMetaDataModel>
     </entry>
   </types>
-  <connectorName>Web_Service_Consumer5</connectorName>
+  <connectorName>Web_Service_Consumer7</connectorName>
 </metadata__catalog__entry>

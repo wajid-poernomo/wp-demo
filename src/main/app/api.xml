@@ -7,12 +7,16 @@ http://www.mulesoft.org/schema/mule/ws http://www.mulesoft.org/schema/mule/ws/cu
 http://www.mulesoft.org/schema/mule/ee/dw http://www.mulesoft.org/schema/mule/ee/dw/current/dw.xsd">
     <http:listener-config name="api-httpListenerConfig" host="0.0.0.0" port="8081" doc:name="HTTP Listener Configuration"/>
     <apikit:config name="api-config" raml="api.raml" consoleEnabled="false" doc:name="Router"/>
-    <ws:consumer-config name="Web_Service_Consumer" service="GlobalWeather" port="GlobalWeatherSoap12" serviceAddress="http://www.webservicex.com/globalweather.asmx" wsdlLocation="http://www.webservicex.com/globalweather.asmx?WSDL" doc:name="Web Service Consumer"/>
+    <ws:consumer-config name="Web_Service_Consumer" service="GlobalWeatherSoapService" port="GlobalWeatherSoapPort" serviceAddress="http://localhost:63081/weather" wsdlLocation="http://www.webservicex.com/globalweather.asmx?WSDL" doc:name="Web Service Consumer"/>
     <ws:consumer-config name="Web_Service_Consumer1" service="GlobalWeather" port="GlobalWeatherSoap12" serviceAddress="http://www.webservicex.com/globalweather.asmx" wsdlLocation="http://www.webservicex.com/globalweather.asmx?WSDL" doc:name="Web Service Consumer"/>
     <ws:consumer-config name="Web_Service_Consumer2" service="GlobalWeather" port="GlobalWeatherSoap12" serviceAddress="http://www.webservicex.com/globalweather.asmx" wsdlLocation="http://www.webservicex.com/globalweather.asmx?WSDL" doc:name="Web Service Consumer"/>
     <ws:consumer-config name="Web_Service_Consumer3" service="GlobalWeather" port="GlobalWeatherSoap12" serviceAddress="http://www.webservicex.com/globalweather.asmx" wsdlLocation="http://www.webservicex.com/globalweather.asmx?WSDL" doc:name="Web Service Consumer"/>
     <ws:consumer-config name="Web_Service_Consumer4" service="GlobalWeather" port="GlobalWeatherSoap12" serviceAddress="http://www.webservicex.com/globalweather.asmx" wsdlLocation="http://www.webservicex.com/globalweather.asmx?WSDL" doc:name="Web Service Consumer"/>
-    <ws:consumer-config name="Web_Service_Consumer5" service="GlobalWeatherSoapService" port="GlobalWeatherSoapPort" serviceAddress="http://localhost:63081/weather" wsdlLocation="http://localhost:63081/weather?wsdl" doc:name="Web Service Consumer"/>
+    <ws:consumer-config name="Web_Service_Consumer5" service="GlobalWeather" port="GlobalWeatherSoap12" serviceAddress="http://DESKTOP-0S92JHR:8088/mockGlobalWeatherSoap12" wsdlLocation="http://localhost:63081/weather?wsdl" doc:name="Web Service Consumer"/>
+    <ws:consumer-config name="Web_Service_Consumer6" service="GlobalWeatherSoapService" port="GlobalWeatherSoapPort" serviceAddress="http://localhost:63081/weather" wsdlLocation="http://desktop-0s92jhr:8088/mockGlobalWeatherSoap12?wsdl" doc:name="Web Service Consumer"/>
+    <ws:consumer-config name="Web_Service_Consumer7" service="GlobalWeatherSoapService" port="GlobalWeatherSoapPort" serviceAddress="http://localhost:63081/weather" wsdlLocation="http://localhost:63081/weather?wsdl" doc:name="Web Service Consumer"/>
+    <ws:consumer-config name="Web_Service_Consumer8" service="GlobalWeather" port="GlobalWeatherSoap12" serviceAddress="http://www.webservicex.com/globalweather.asmx" wsdlLocation="http://localhost:63081/weather?wsdl" doc:name="Web Service Consumer"/>
+    <ws:consumer-config name="Web_Service_Consumer9" service="GlobalWeather" port="GlobalWeatherSoap12" serviceAddress="http://www.webservicex.com/globalweather.asmx" wsdlLocation="http://www.webservicex.com/globalweather.asmx?WSDL" doc:name="Web Service Consumer"/>
     <flow name="api-main">
         <http:listener config-ref="api-httpListenerConfig" path="/api/*" doc:name="HTTP"/>
         <apikit:router config-ref="api-config" doc:name="APIkit Router"/>
@@ -61,7 +65,7 @@ http://www.mulesoft.org/schema/mule/ee/dw http://www.mulesoft.org/schema/mule/ee
 	}
 }]]></dw:set-payload>
         </dw:transform-message>
-        <ws:consumer config-ref="Web_Service_Consumer" operation="GetCitiesByCountry" doc:name="Web Service Consumer"/>
+        <ws:consumer config-ref="Web_Service_Consumer9" operation="GetCitiesByCountry" doc:name="Web Service Consumer"/>
         <dw:transform-message metadata:id="073d85a4-cd9c-414f-bd71-445a0221ed59" doc:name="Transform Message">
             <dw:set-payload><![CDATA[%dw 1.0
 %output application/json
@@ -91,14 +95,25 @@ http://www.mulesoft.org/schema/mule/ee/dw http://www.mulesoft.org/schema/mule/ee
 	}
 }]]></dw:set-payload>
         </dw:transform-message>
-        <ws:consumer config-ref="Web_Service_Consumer5" operation="GetWeather" doc:name="Web Service Consumer"/>
+        <ws:consumer config-ref="Web_Service_Consumer7" operation="GetWeather" doc:name="Web Service Consumer"/>
+
         <dw:transform-message metadata:id="c2e903a5-01d1-4cb0-b8af-fa937faa5721" doc:name="Transform Message">
             <dw:set-payload><![CDATA[%dw 1.0
+%input payload application/xml
 %output application/json
 %namespace ns0 http://www.webserviceX.NET
 ---
 {
-	thing: payload.ns0#GetWeatherResponse.ns0#GetWeatherResult
+	Location: read(payload.ns0#GetWeatherResponse.ns0#GetWeatherResult, "application/xml").CurrentWeather.Location,
+	Time: read(payload.ns0#GetWeatherResponse.ns0#GetWeatherResult, "application/xml").CurrentWeather.Time,
+	Wind: read(payload.ns0#GetWeatherResponse.ns0#GetWeatherResult, "application/xml").CurrentWeather.Wind,
+	Visibility: read(payload.ns0#GetWeatherResponse.ns0#GetWeatherResult, "application/xml").CurrentWeather.Visibility,
+	SkyConditions: read(payload.ns0#GetWeatherResponse.ns0#GetWeatherResult, "application/xml").CurrentWeather.SkyConditions,
+	Temperature: read(payload.ns0#GetWeatherResponse.ns0#GetWeatherResult, "application/xml").CurrentWeather.Temperature,
+	DewPoint: read(payload.ns0#GetWeatherResponse.ns0#GetWeatherResult, "application/xml").CurrentWeather.DewPoint,
+	RelativeHumidity: read(payload.ns0#GetWeatherResponse.ns0#GetWeatherResult, "application/xml").CurrentWeather.RelativeHumidity,
+	Pressure:  read(payload.ns0#GetWeatherResponse.ns0#GetWeatherResult, "application/xml").CurrentWeather.Pressure,
+	PressureTendency: read(payload.ns0#GetWeatherResponse.ns0#GetWeatherResult, "application/xml").CurrentWeather.PressureTendency
 }
 ]]></dw:set-payload>
         </dw:transform-message>

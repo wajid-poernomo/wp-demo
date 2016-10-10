@@ -1,6 +1,6 @@
 <metadata__cache__entry>
   <version>5.2.0.0</version>
-  <connectorName>Web_Service_Consumer</connectorName>
+  <connectorName>Web_Service_Consumer8</connectorName>
   <metadataIo class="tree-map">
     <entry>
       <string>GetCitiesByCountry</string>
