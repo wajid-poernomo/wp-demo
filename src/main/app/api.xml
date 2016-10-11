@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<mule xmlns:dw="http://www.mulesoft.org/schema/mule/ee/dw" xmlns:ws="http://www.mulesoft.org/schema/mule/ws" xmlns:metadata="http://www.mulesoft.org/schema/mule/metadata" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/apikit" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:spring="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+<mule xmlns:tracking="http://www.mulesoft.org/schema/mule/ee/tracking" xmlns:dw="http://www.mulesoft.org/schema/mule/ee/dw" xmlns:ws="http://www.mulesoft.org/schema/mule/ws" xmlns:metadata="http://www.mulesoft.org/schema/mule/metadata" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/apikit" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:spring="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
 http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
 http://www.mulesoft.org/schema/mule/apikit http://www.mulesoft.org/schema/mule/apikit/current/mule-apikit.xsd
 http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
 http://www.mulesoft.org/schema/mule/ws http://www.mulesoft.org/schema/mule/ws/current/mule-ws.xsd
-http://www.mulesoft.org/schema/mule/ee/dw http://www.mulesoft.org/schema/mule/ee/dw/current/dw.xsd">
+http://www.mulesoft.org/schema/mule/ee/dw http://www.mulesoft.org/schema/mule/ee/dw/current/dw.xsd
+http://www.mulesoft.org/schema/mule/ee/tracking http://www.mulesoft.org/schema/mule/ee/tracking/current/mule-tracking-ee.xsd">
     <http:listener-config name="api-httpListenerConfig" host="0.0.0.0" port="8081" doc:name="HTTP Listener Configuration"/>
     <apikit:config name="api-config" raml="api.raml" consoleEnabled="false" doc:name="Router"/>
     <ws:consumer-config name="Web_Service_Consumer" service="GlobalWeatherSoapService" port="GlobalWeatherSoapPort" serviceAddress="http://localhost:63081/weather" wsdlLocation="http://www.webservicex.com/globalweather.asmx?WSDL" doc:name="Web Service Consumer"/>
@@ -49,7 +50,13 @@ http://www.mulesoft.org/schema/mule/ee/dw http://www.mulesoft.org/schema/mule/ee
 {
 	cities: read(payload.ns0#GetCitiesByCountryResponse.ns0#GetCitiesByCountryResult, "application/xml").NewDataSet.*Table..City distinctBy $ map
 		"city" : toItem($)
-}]]></dw:set-payload>
+}
+when payload.ns0#GetCitiesByCountryResponse.ns0#GetCitiesByCountryResult != "" 
+or payload.ns0#GetCitiesByCountryResponse.ns0#GetCitiesByCountryResult != "Data Not Found"
+otherwise
+{
+}
+]]></dw:set-payload>
         </dw:transform-message>
 
     </flow>
@@ -70,13 +77,18 @@ http://www.mulesoft.org/schema/mule/ee/dw http://www.mulesoft.org/schema/mule/ee
             <dw:set-payload><![CDATA[%dw 1.0
 %output application/json
 %namespace ns0 http://www.webserviceX.NET
-%var toItem = (item) -> {name: item }
+%var toItem = (item) -> {name: item, description: item ++ "- a great country to be."}
 ---
 {
 	countries : 
 		read(payload.ns0#GetCitiesByCountryResponse.ns0#GetCitiesByCountryResult, "application/xml").NewDataSet.*Table..Country distinctBy $ map
 		"country" : toItem($)
-	
+}
+
+when payload.ns0#GetCitiesByCountryResponse.ns0#GetCitiesByCountryResult != "" 
+or payload.ns0#GetCitiesByCountryResponse.ns0#GetCitiesByCountryResult != "Data Not Found"
+otherwise
+{
 }
 ]]></dw:set-payload>
         </dw:transform-message>
@@ -115,8 +127,35 @@ http://www.mulesoft.org/schema/mule/ee/dw http://www.mulesoft.org/schema/mule/ee
 	Pressure:  read(payload.ns0#GetWeatherResponse.ns0#GetWeatherResult, "application/xml").CurrentWeather.Pressure,
 	PressureTendency: read(payload.ns0#GetWeatherResponse.ns0#GetWeatherResult, "application/xml").CurrentWeather.PressureTendency
 }
+
 ]]></dw:set-payload>
+            <dw:set-variable variableName="responseMap"><![CDATA[%dw 1.0
+%input payload application/xml
+%output application/java
+%namespace ns0 http://www.webserviceX.NET
+---
+{
+	"notFound" : true
+	
+}
+when payload.ns0#GetCitiesByCountryResponse.ns0#GetCitiesByCountryResult != "" 
+or payload.ns0#GetCitiesByCountryResponse.ns0#GetCitiesByCountryResult != "Data Not Found"
+otherwise
+{
+	"test" : true
+}]]></dw:set-variable>
+
         </dw:transform-message>
+        <logger message="#[responseMap['notFound']]" level="INFO" doc:name="Logger"/>
+        <choice doc:name="Choice">
+            <when expression="#[responseMap['notFound']]">
+                <set-payload value="{ &quot;message&quot;: &quot;Resource not found&quot; }" doc:name="Set Payload"/>
+                <set-property propertyName="http.status" value="404" doc:name="Property"/>
+            </when>
+            <otherwise>
+                <set-payload value="#[payload]" doc:name="Set Payload"/>
+            </otherwise>
+        </choice>
 
     </flow>
     <flow name="get:/countries/{countryName}/Cities/{city}:api-config">
@@ -139,11 +178,17 @@ http://www.mulesoft.org/schema/mule/ee/dw http://www.mulesoft.org/schema/mule/ee
 %var toItem = (item) -> {name: item, description: item ++ "- a great city to be."}
 ---
 
-read(payload.ns0#GetCitiesByCountryResponse.ns0#GetCitiesByCountryResult, "application/xml").NewDataSet.*Table..City filter
+(read(payload.ns0#GetCitiesByCountryResponse.ns0#GetCitiesByCountryResult, "application/xml").NewDataSet.*Table..City filter
 		flowVars.city == $ map {
 			"city" : toItem($)	
-		}
-]]></dw:set-payload>
+		})[0]
+
+when payload.ns0#GetCitiesByCountryResponse.ns0#GetCitiesByCountryResult != "" 
+or payload.ns0#GetCitiesByCountryResponse.ns0#GetCitiesByCountryResult != "Data Not Found"
+otherwise
+{
+}
+		]]></dw:set-payload>
         </dw:transform-message>
 
     </flow>
@@ -166,15 +211,23 @@ read(payload.ns0#GetCitiesByCountryResponse.ns0#GetCitiesByCountryResult, "appli
 %namespace ns0 http://www.webserviceX.NET
 %var toItem = (item) -> {name: item, description: item ++ "- a great country to be."}
 ---
-read(payload.ns0#GetCitiesByCountryResponse.ns0#GetCitiesByCountryResult, "application/xml").NewDataSet.*Table..Country 
-		distinctBy $ map
-		{
-			"country" : toItem($)
-		}
+
+(read(payload.ns0#GetCitiesByCountryResponse.ns0#GetCitiesByCountryResult, "application/xml").NewDataSet.*Table..Country map 
+{
+	country : toItem($)
+})[0]
+
+when payload.ns0#GetCitiesByCountryResponse.ns0#GetCitiesByCountryResult != "" 
+or payload.ns0#GetCitiesByCountryResponse.ns0#GetCitiesByCountryResult != "Data Not Found"
+otherwise
+{
+}
 ]]></dw:set-payload>
         </dw:transform-message>
 
     </flow>
+    
+    
     <apikit:mapping-exception-strategy name="api-apiKitGlobalExceptionMapping">
         <apikit:mapping statusCode="404">
             <apikit:exception value="org.mule.module.apikit.exception.NotFoundException" />
