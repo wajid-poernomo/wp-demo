@@ -11,15 +11,20 @@ http://www.mulesoft.org/schema/mule/ee/tracking http://www.mulesoft.org/schema/m
     <ws:consumer-config name="Web_Service_Consumer" service="GlobalWeatherSoapService" port="GlobalWeatherSoapPort" serviceAddress="http://localhost:63081/weather" wsdlLocation="http://www.webservicex.com/globalweather.asmx?WSDL" doc:name="Web Service Consumer"/>
     <ws:consumer-config name="Web_Service_Consumer1" service="GlobalWeather" port="GlobalWeatherSoap12" serviceAddress="http://www.webservicex.com/globalweather.asmx" wsdlLocation="http://www.webservicex.com/globalweather.asmx?WSDL" doc:name="Web Service Consumer"/>
     <ws:consumer-config name="Web_Service_Consumer2" service="GlobalWeather" port="GlobalWeatherSoap12" serviceAddress="http://www.webservicex.com/globalweather.asmx" wsdlLocation="http://www.webservicex.com/globalweather.asmx?WSDL" doc:name="Web Service Consumer"/>
-    <ws:consumer-config name="Web_Service_Consumer3" service="GlobalWeather" port="GlobalWeatherSoap12" serviceAddress="http://www.webservicex.com/globalweather.asmx" wsdlLocation="http://www.webservicex.com/globalweather.asmx?WSDL" doc:name="Web Service Consumer"/>
+    <ws:consumer-config name="Web_Service_Consumer3" service="GlobalWeatherSoapService" port="GlobalWeatherSoapPort" serviceAddress="http://localhost:63081/weather" wsdlLocation="http://www.webservicex.com/globalweather.asmx?WSDL" doc:name="Web Service Consumer"/>
     <ws:consumer-config name="Web_Service_Consumer4" service="GlobalWeather" port="GlobalWeatherSoap12" serviceAddress="http://www.webservicex.com/globalweather.asmx" wsdlLocation="http://www.webservicex.com/globalweather.asmx?WSDL" doc:name="Web Service Consumer"/>
     <ws:consumer-config name="Web_Service_Consumer5" service="GlobalWeather" port="GlobalWeatherSoap12" serviceAddress="http://DESKTOP-0S92JHR:8088/mockGlobalWeatherSoap12" wsdlLocation="http://localhost:63081/weather?wsdl" doc:name="Web Service Consumer"/>
     <ws:consumer-config name="Web_Service_Consumer6" service="GlobalWeatherSoapService" port="GlobalWeatherSoapPort" serviceAddress="http://localhost:63081/weather" wsdlLocation="http://desktop-0s92jhr:8088/mockGlobalWeatherSoap12?wsdl" doc:name="Web Service Consumer"/>
     <ws:consumer-config name="Web_Service_Consumer7" service="GlobalWeatherSoapService" port="GlobalWeatherSoapPort" serviceAddress="http://localhost:63081/weather" wsdlLocation="http://localhost:63081/weather?wsdl" doc:name="Web Service Consumer"/>
     <ws:consumer-config name="Web_Service_Consumer8" service="GlobalWeather" port="GlobalWeatherSoap12" serviceAddress="http://www.webservicex.com/globalweather.asmx" wsdlLocation="http://localhost:63081/weather?wsdl" doc:name="Web Service Consumer"/>
     <ws:consumer-config name="Web_Service_Consumer9" service="GlobalWeather" port="GlobalWeatherSoap12" serviceAddress="http://www.webservicex.com/globalweather.asmx" wsdlLocation="http://www.webservicex.com/globalweather.asmx?WSDL" doc:name="Web Service Consumer"/>
+    <ws:consumer-config name="Web_Service_Consumer10" service="GlobalWeatherSoapService" port="GlobalWeatherSoapPort" serviceAddress="http://localhost:63081/weather" wsdlLocation="http://localhost:63081/weather?wsdl" doc:name="Web Service Consumer"/>
+    <ws:consumer-config name="Web_Service_Consumer11" service="GlobalWeatherSoapService" port="GlobalWeatherSoapPort" serviceAddress="http://localhost:63081/weather" wsdlLocation="http://localhost:63081/weather?wsdl" doc:name="Web Service Consumer"/>
+    <ws:consumer-config name="Web_Service_Consumer12" service="GlobalWeatherSoapService" port="GlobalWeatherSoapPort" serviceAddress="http://localhost:63081/weather" wsdlLocation="http://localhost:63081/weather?wsdl" doc:name="Web Service Consumer"/>
+    <ws:consumer-config name="Web_Service_Consumer13" service="GlobalWeatherSoapService" port="GlobalWeatherSoapPort" serviceAddress="http://localhost:63081/weather" wsdlLocation="http://localhost:63081/weather?wsdl" doc:name="Web Service Consumer"/>
+    <ws:consumer-config name="Web_Service_Consumer14" service="GlobalWeatherSoapService" port="GlobalWeatherSoapPort" serviceAddress="http://localhost:63081/weather" wsdlLocation="http://localhost:63081/weather?wsdl" doc:name="Web Service Consumer"/>
     <flow name="api-main">
-        <http:listener config-ref="api-httpListenerConfig" path="/api/*" doc:name="HTTP"/>
+        <http:listener config-ref="api-httpListenerConfig" path="/weatherApi/*" doc:name="HTTP"/>
         <apikit:router config-ref="api-config" doc:name="APIkit Router"/>
         <exception-strategy ref="api-apiKitGlobalExceptionMapping" doc:name="Reference Exception Strategy"/>
     </flow>
@@ -39,7 +44,7 @@ http://www.mulesoft.org/schema/mule/ee/tracking http://www.mulesoft.org/schema/m
 	}
 }]]></dw:set-payload>
         </dw:transform-message>
-        <ws:consumer config-ref="Web_Service_Consumer3" operation="GetCitiesByCountry" doc:name="Web Service Consumer"/>
+        <ws:consumer config-ref="Web_Service_Consumer10" operation="GetCitiesByCountry" doc:name="Web Service Consumer"/>
         <dw:transform-message doc:name="Transform Message">
             <dw:set-payload><![CDATA[%dw 1.0
 %output application/json
@@ -62,7 +67,7 @@ otherwise
 %output application/java
 ---
 {
-	"notFound": true
+	"notFound": false
 }
 when payload.ns0#GetCitiesByCountryResponse.ns0#GetCitiesByCountryResult != "" 
 or payload.ns0#GetCitiesByCountryResponse.ns0#GetCitiesByCountryResult != "Data Not Found"
@@ -95,7 +100,8 @@ otherwise
 	}
 }]]></dw:set-payload>
         </dw:transform-message>
-        <ws:consumer config-ref="Web_Service_Consumer9" operation="GetCitiesByCountry" doc:name="Web Service Consumer"/>
+        <ws:consumer config-ref="Web_Service_Consumer11" operation="GetCitiesByCountry" doc:name="Web Service Consumer"/>
+
         <dw:transform-message metadata:id="073d85a4-cd9c-414f-bd71-445a0221ed59" doc:name="Transform Message">
             <dw:set-payload><![CDATA[%dw 1.0
 %output application/json
@@ -153,7 +159,9 @@ otherwise
 	}
 }]]></dw:set-payload>
         </dw:transform-message>
-        <ws:consumer config-ref="Web_Service_Consumer7" operation="GetWeather" doc:name="Web Service Consumer"/>
+        <ws:consumer config-ref="Web_Service_Consumer12" operation="GetWeather" doc:name="Web Service Consumer"/>
+        <logger message="#[payload]" level="INFO" doc:name="Logger"/>
+
 
         <dw:transform-message metadata:id="c2e903a5-01d1-4cb0-b8af-fa937faa5721" doc:name="Transform Message">
             <dw:set-payload><![CDATA[%dw 1.0
@@ -181,7 +189,7 @@ otherwise
 %namespace ns0 http://www.webserviceX.NET
 ---
 {
-	"notFound" : true
+	"notFound" : false
 	
 }
 when payload.ns0#GetCitiesByCountryResponse.ns0#GetCitiesByCountryResult != "" 
@@ -216,7 +224,8 @@ otherwise
 	}
 }]]></dw:set-payload>
         </dw:transform-message>
-        <ws:consumer config-ref="Web_Service_Consumer2" operation="GetCitiesByCountry" doc:name="Web Service Consumer"/>
+        <ws:consumer config-ref="Web_Service_Consumer13" operation="GetCitiesByCountry" doc:name="Web Service Consumer"/>
+
         <dw:transform-message metadata:id="231617f2-ab6f-4fa2-8a1d-69a26749b551" doc:name="Transform Message">
             <dw:set-payload><![CDATA[%dw 1.0
 %output application/json
@@ -272,7 +281,9 @@ otherwise
 	}
 }]]></dw:set-payload>
         </dw:transform-message>
-        <ws:consumer config-ref="Web_Service_Consumer1" operation="GetCitiesByCountry" doc:name="Web Service Consumer"/>
+        <ws:consumer config-ref="Web_Service_Consumer14" operation="GetCitiesByCountry" doc:name="Web Service Consumer"/>
+        <logger message="#[payload]" level="INFO" doc:name="Logger"/>
+
         <dw:transform-message metadata:id="7abedd22-2db7-4ca5-9c72-8c4f81645e81" doc:name="Transform Message">
             <dw:set-payload><![CDATA[%dw 1.0
 %output application/json
